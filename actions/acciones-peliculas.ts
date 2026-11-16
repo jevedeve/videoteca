@@ -1,0 +1,139 @@
+
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+
+export type ResultadoAccion = {
+  exito: boolean;
+  mensaje: string;
+};
+
+/**
+ * Crea una película.
+ * Valida el título y convierte el comentario vacío en null.
+ */
+export async function crearPelicula(
+  datosFormulario: FormData
+): Promise<ResultadoAccion> {
+  try {
+    const titulo = datosFormulario.get("titulo");
+    const comentario = datosFormulario.get("comentario");
+
+    const tituloPelicula =
+      typeof titulo === "string" ? titulo.trim() : "";
+
+    const comentarioPelicula =
+      typeof comentario === "string" ? comentario.trim() : "";
+
+    if (!tituloPelicula) {
+      return {
+        exito: false,
+        mensaje: "El título no puede estar vacío.",
+      };
+    }
+
+    if (tituloPelicula.length > 80) {
+      return {
+        exito: false,
+        mensaje: "El título no puede superar los 80 caracteres.",
+      };
+    }
+
+    await prisma.pelicula.create({
+      data: {
+        titulo: tituloPelicula,
+        comentario: comentarioPelicula || null,
+      },
+    });
+
+    revalidatePath("/");
+    revalidatePath("/vistas");
+
+    return {
+      exito: true,
+      mensaje: "Película añadida correctamente.",
+    };
+  } catch {
+    return {
+      exito: false,
+      mensaje: "Error al añadir la película.",
+    };
+  }
+}
+
+/**
+ * Cambia una película entre vista y pendiente.
+ */
+export async function alternarVista(
+  id: string,
+  vista: boolean
+): Promise<ResultadoAccion> {
+  try {
+    const pelicula = await prisma.pelicula.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!pelicula) {
+      return {
+        exito: false,
+        mensaje: "La película no existe.",
+      };
+    }
+
+    await prisma.pelicula.update({
+      where: {
+        id,
+      },
+      data: {
+        vista: !vista,
+      },
+    });
+
+    revalidatePath("/");
+    revalidatePath("/vistas");
+    revalidatePath(`/peliculas/${id}`);
+
+    return {
+      exito: true,
+      mensaje: vista
+        ? "Película marcada como pendiente."
+        : "Película marcada como vista.",
+    };
+  } catch {
+    return {
+      exito: false,
+      mensaje: "Error al cambiar el estado de la película.",
+    };
+  }
+}
+
+/**
+ * Borra una película por su identificador.
+ */
+export async function borrarPelicula(
+  id: string
+): Promise<ResultadoAccion> {
+  try {
+    await prisma.pelicula.delete({
+      where: {
+        id,
+      },
+    });
+
+    revalidatePath("/");
+    revalidatePath("/vistas");
+
+    return {
+      exito: true,
+      mensaje: "Película eliminada correctamente.",
+    };
+  } catch {
+    return {
+      exito: false,
+      mensaje: "Error al eliminar la película.",
+    };
+  }
+}

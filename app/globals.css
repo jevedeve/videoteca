@@ -5,8 +5,7 @@
    CONFIGURACIÓN DEL TEMA
 ========================================= */
 
-@custom-variant oscuro (&:where(.oscuro, .oscuro *));
-
+@custom-variant oscuro (@media (prefers-color-scheme: dark));
 /* =========================================
    PALETA GLOBAL - MODO CLARO
 ========================================= */
@@ -85,8 +84,9 @@
 ========================================= */
 
 .oscuro {
-  color-scheme: dark;
-
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
   /* Colores principales */
   --color-principal: #D8C79A;
   --color-principal-hover: #E5D6B0;
@@ -148,7 +148,9 @@
   --gris-700: #C5C4BD;
   --gris-800: #DAD9D3;
   --gris-900: #ECEBE7;
-  --gris-950: #F5F5F3;
+    --gris-950: #F5F5F3;
+  }
+}
 }
 
 /* =========================================
