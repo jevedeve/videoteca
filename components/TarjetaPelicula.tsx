@@ -22,6 +22,17 @@ export function TarjetaPelicula({
 
   return (
     <article className="group flex flex-col gap-5 rounded-2xl border border-borde bg-superficie p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg">
+
+      {pelicula.poster && (
+        <Link href={`/peliculas/${pelicula.id}`}>
+          <img
+            src={`https://image.tmdb.org/t/p/w500${pelicula.poster}`}
+            alt={`Póster de ${pelicula.titulo}`}
+            className="aspect-[2/3] w-full rounded-xl object-cover"
+          />
+        </Link>
+      )}
+
       <div className="flex items-start justify-between gap-4">
         <Link
           href={`/peliculas/${pelicula.id}`}
@@ -35,6 +46,14 @@ export function TarjetaPelicula({
           vista={pelicula.vista}
         />
       </div>
+
+
+      {pelicula.sinopsis && (
+        <p className="line-clamp-3 text-sm leading-6 text-texto-secundario">
+          {pelicula.sinopsis}
+        </p>
+      )}
+
 
       {pelicula.comentario && (
         <p className="line-clamp-2 text-sm leading-7 text-texto-secundario">

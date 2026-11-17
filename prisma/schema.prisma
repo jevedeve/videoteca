@@ -14,4 +14,7 @@ model Pelicula {
   comentario  String?
   vista       Boolean  @default(false)
   guardadaEn  DateTime @default(now())
+  tmdbId      Int?     @unique
+  poster      String?
+  sinopsis    String?
 }

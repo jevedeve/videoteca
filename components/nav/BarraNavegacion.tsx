@@ -1,8 +1,6 @@
 
 import Link from "next/link";
 
-// Navegación principal de Videoteca.
-// Aparece en todas las páginas porque se incluye en app/layout.tsx.
 export function BarraNavegacion() {
   return (
     <nav className="border-b border-borde">
@@ -13,6 +11,10 @@ export function BarraNavegacion() {
 
         <Link href="/vistas" className="hover:underline">
           Vistas
+        </Link>
+
+        <Link href="/buscar" className="hover:underline">
+          Buscar películas
         </Link>
       </div>
     </nav>

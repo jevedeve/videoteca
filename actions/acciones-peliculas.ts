@@ -137,3 +137,35 @@ export async function borrarPelicula(
     };
   }
 }
+
+
+
+export async function crearPeliculaDesdeTMDB(
+  tmdbId: number,
+  titulo: string,
+  poster: string | null,
+  sinopsis: string | null
+): Promise<ResultadoAccion> {
+  try {
+    if (!Number.isInteger(tmdbId) || tmdbId <= 0 ||
+        !titulo.trim() || titulo.trim().length > 80) {
+      return { exito: false, mensaje: "Datos de película no válidos." };
+    }
+
+    await prisma.pelicula.create({
+      data: {
+        tmdbId,
+        titulo: titulo.trim(),
+        poster,
+        sinopsis,
+      },
+    });
+
+    revalidatePath("/");
+
+    return { exito: true, mensaje: "Película añadida correctamente." };
+  } catch {
+    return { exito: false, mensaje: "No se pudo añadir la película." };
+  }
+}
+

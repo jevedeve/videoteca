@@ -33,6 +33,15 @@ export default async function PaginaPelicula(
       <EnlaceVolver href="/">Volver</EnlaceVolver>
 
       <article className="flex flex-col gap-8 rounded-2xl border border-borde bg-superficie p-6 shadow-sm sm:p-10">
+
+        {pelicula.poster && (
+          <img
+            src={`https://image.tmdb.org/t/p/w500${pelicula.poster}`}
+            alt={`Póster de ${pelicula.titulo}`}
+            className="w-full max-w-xs self-center rounded-xl shadow-lg"
+          />
+        )}
+
         <header className="flex flex-col gap-3">
           <h1 className="text-3xl font-bold leading-tight tracking-tight text-texto sm:text-4xl lg:text-5xl">
             {pelicula.titulo}
@@ -49,6 +58,18 @@ export default async function PaginaPelicula(
             Guardada el {fechaFormateada}
           </time>
         </header>
+
+        {pelicula.sinopsis && (
+          <section className="flex flex-col gap-3">
+            <h2 className="text-xl font-semibold text-texto">
+              Sinopsis
+            </h2>
+            <p className="leading-8 text-texto-secundario">
+              {pelicula.sinopsis}
+            </p>
+          </section>
+        )}
+
 
         {pelicula.comentario ? (
           <p className="whitespace-pre-wrap text-base leading-8 text-texto">
