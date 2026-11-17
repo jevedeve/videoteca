@@ -151,6 +151,16 @@ export async function crearPeliculaDesdeTMDB(
         !titulo.trim() || titulo.trim().length > 80) {
       return { exito: false, mensaje: "Datos de película no válidos." };
     }
+    const existente = await prisma.pelicula.findUnique({
+  where: { tmdbId },
+});
+
+if (existente) {
+  return {
+    exito: false,
+    mensaje: "Esta película ya está en tu videoteca.",
+  };
+}
 
     await prisma.pelicula.create({
       data: {
