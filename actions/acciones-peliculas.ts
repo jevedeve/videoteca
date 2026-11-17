@@ -169,3 +169,27 @@ export async function crearPeliculaDesdeTMDB(
   }
 }
 
+
+export async function guardarValoracion(
+  id: string,
+  valoracion: number
+) {
+  "use server";
+
+  if (!Number.isInteger(valoracion) || valoracion < 1 || valoracion > 10) {
+    return { exito: false, mensaje: "Valoración no válida." };
+  }
+
+  try {
+    await prisma.pelicula.update({
+      where: { id },
+      data: { valoracion },
+    });
+
+    revalidatePath(`/peliculas/${id}`);
+    return { exito: true, mensaje: "Valoración guardada." };
+  } catch {
+    return { exito: false, mensaje: "No se pudo guardar la valoración." };
+  }
+}
+

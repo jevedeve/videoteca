@@ -48,6 +48,14 @@ export function TarjetaPelicula({
       </div>
 
 
+      {pelicula.valoracion !== null && (
+        <p className="text-sm font-semibold text-principal">
+          ⭐ {pelicula.valoracion}/10
+        </p>
+      )}
+
+
+
       {pelicula.sinopsis && (
         <p className="line-clamp-3 text-sm leading-6 text-texto-secundario">
           {pelicula.sinopsis}

@@ -17,4 +17,5 @@ model Pelicula {
   tmdbId      Int?     @unique
   poster      String?
   sinopsis    String?
+  valoracion  Int?
 }

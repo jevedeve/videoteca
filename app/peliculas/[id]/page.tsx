@@ -5,6 +5,7 @@ import { obtenerPeliculaPorId } from "@/lib/peliculas";
 import { EnlaceVolver } from "@/components/nav/EnlaceVolver";
 import { BotonVista } from "@/components/BotonVista";
 import { BotonBorrarPelicula } from "@/components/BotonBorrarPelicula";
+import { BotonValoracion } from "@/components/BotonValoracion";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,10 @@ export default async function PaginaPelicula(
         )}
 
         <div className="flex items-center justify-end gap-3 border-t border-borde pt-6">
+          <BotonValoracion
+            id={pelicula.id}
+            valoracion={pelicula.valoracion}
+          />
           <BotonVista
             id={pelicula.id}
             vista={pelicula.vista}
