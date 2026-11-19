@@ -3,6 +3,10 @@ import Link from "next/link";
 import type { Pelicula } from "@prisma/client";
 import { BotonVista } from "@/components/BotonVista";
 import { BotonBorrarPelicula } from "@/components/BotonBorrarPelicula";
+import { FormularioComentario } from "@/components/FormularioComentario";
+import { BotonValoracion } from "@/components/BotonValoracion";
+import { PlataformasStreaming } from "@/components/PlataformasStreaming";
+import { BotonTrailer } from "@/components/BotonTrailer";
 
 type TarjetaPeliculaProps = {
   pelicula: Pelicula;
@@ -33,6 +37,9 @@ export function TarjetaPelicula({
         </Link>
       )}
 
+      <span className="w-fit rounded-full border border-borde px-3 py-1 text-xs font-semibold text-texto-secundario">
+  {pelicula.tipo === "serie" ? "📺 Serie" : "🎬 Película"}
+</span>
       <div className="flex items-start justify-between gap-4">
         <Link
           href={`/peliculas/${pelicula.id}`}
@@ -48,11 +55,10 @@ export function TarjetaPelicula({
       </div>
 
 
-      {pelicula.valoracion !== null && (
-        <p className="text-sm font-semibold text-principal">
-          ⭐ {pelicula.valoracion}/10
-        </p>
-      )}
+      <BotonValoracion
+  id={pelicula.id}
+  valoracion={pelicula.valoracion}
+/>
 
 
 
@@ -61,13 +67,24 @@ export function TarjetaPelicula({
           {pelicula.sinopsis}
         </p>
       )}
+      {pelicula.tmdbId !== null && (
+  <PlataformasStreaming
+    tmdbId={pelicula.tmdbId}
+    tipo={pelicula.tipo === "serie" ? "serie" : "pelicula"}
+  />
+)}
+{pelicula.tmdbId !== null && (
+  <BotonTrailer
+    tmdbId={pelicula.tmdbId}
+    tipo={pelicula.tipo === "serie" ? "serie" : "pelicula"}
+  />
+)}
 
 
-      {pelicula.comentario && (
-        <p className="line-clamp-2 text-sm leading-7 text-texto-secundario">
-          {pelicula.comentario}
-        </p>
-      )}
+     <FormularioComentario
+  id={pelicula.id}
+  comentario={pelicula.comentario}
+/>
 
       <div className="flex items-end justify-between gap-4">
         <time

@@ -7,8 +7,14 @@ import type { Pelicula } from "@prisma/client";
  * Primero muestra las pendientes y después las vistas.
  * Dentro de cada grupo, las más recientes aparecen primero.
  */
-export async function obtenerPeliculas(): Promise<Pelicula[]> {
+export async function obtenerPeliculas(
+  tipo?: "pelicula" | "serie"
+): Promise<Pelicula[]> {
   return await prisma.pelicula.findMany({
+    where: {
+  vista: false,
+  ...(tipo ? { tipo } : {}),
+},
     orderBy: [
       { vista: "asc" },
       { guardadaEn: "desc" },
@@ -20,14 +26,15 @@ export async function obtenerPeliculas(): Promise<Pelicula[]> {
  * Obtiene únicamente las películas marcadas como vistas.
  * Las más recientes aparecen primero.
  */
-export async function obtenerPeliculasVistas(): Promise<Pelicula[]> {
+export async function obtenerPeliculasVistas(
+  tipo?: "pelicula" | "serie"
+): Promise<Pelicula[]> {
   return await prisma.pelicula.findMany({
     where: {
       vista: true,
+      ...(tipo ? { tipo } : {}),
     },
-    orderBy: {
-      guardadaEn: "desc",
-    },
+    orderBy: { guardadaEn: "desc" },
   });
 }
 

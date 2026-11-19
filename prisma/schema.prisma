@@ -11,11 +11,13 @@ datasource db {
 model Pelicula {
   id          String   @id @default(cuid())
   titulo      String
+  tipo        String @default("pelicula")
   comentario  String?
   vista       Boolean  @default(false)
   guardadaEn  DateTime @default(now())
-  tmdbId      Int?     @unique
+  tmdbId      Int?
   poster      String?
   sinopsis    String?
   valoracion  Int?
+  @@unique([tipo, tmdbId])
 }

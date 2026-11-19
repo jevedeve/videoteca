@@ -24,6 +24,27 @@ export function FormularioPelicula() {
       onSubmit={manejarEnvio}
       className="flex flex-col gap-6 rounded-2xl border border-borde bg-superficie p-6 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-8"
     >
+      {/* NUEVO: selector Película / Serie */}
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="tipo"
+          className="text-sm font-semibold text-texto"
+        >
+          Tipo de contenido
+        </label>
+
+        <select
+          id="tipo"
+          name="tipo"
+          defaultValue="pelicula"
+          disabled={enviando}
+          className="w-full rounded-xl border border-borde-secundario bg-superficie px-4 py-3.5 text-texto outline-none focus:border-principal focus:ring-2 focus:ring-principal/20"
+        >
+          <option value="pelicula">Película</option>
+          <option value="serie">Serie</option>
+        </select>
+      </div>
+
       <div className="flex flex-col gap-2">
         <label
           htmlFor="titulo"
@@ -80,7 +101,7 @@ export function FormularioPelicula() {
           icono={Plus}
           cargando={enviando}
         >
-          Añadir película
+          Añadir película o serie
         </Boton>
       </div>
     </form>

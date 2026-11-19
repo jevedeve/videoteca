@@ -10,6 +10,7 @@ type Props = {
   titulo: string;
   poster: string | null;
   sinopsis: string | null;
+  tipo?: "pelicula" | "serie";
 };
 
 export function BotonAgregarTMDB({
@@ -17,6 +18,7 @@ export function BotonAgregarTMDB({
   titulo,
   poster,
   sinopsis,
+  tipo = "pelicula",
 }: Props) {
   const [cargando, setCargando] = useState(false);
 
@@ -25,11 +27,13 @@ export function BotonAgregarTMDB({
 
     try {
       const resultado = await crearPeliculaDesdeTMDB(
-        tmdbId,
-        titulo,
-        poster,
-        sinopsis
-      );
+  tmdbId,
+  titulo,
+  poster,
+  sinopsis,
+  tipo
+);
+    
 
       if (resultado.exito) {
         toast.success(resultado.mensaje);

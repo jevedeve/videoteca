@@ -1,24 +1,39 @@
-import { buscarPeliculas } from "@/lib/tmdb";
 import { BotonAgregarTMDB } from "@/components/BotonAgregarTMDB";
-
+import { buscarPeliculas, buscarSeries, buscarTodo } from "@/lib/tmdb";
 export default async function Buscar({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+    searchParams: Promise<{
+  q?: string;
+  tipo?: string;
+}>;
 }) {
-  const { q } = await searchParams;
-  const datos = q ? await buscarPeliculas(q) : null;
-
+    const { q, tipo } = await searchParams;
+const datos = q
+  ? tipo === "serie"
+    ? await buscarSeries(q)
+    : tipo === "pelicula"
+      ? await buscarPeliculas(q)
+      : await buscarTodo(q)
+  : null;
   return (
     <main className="p-8">
-      <h1 className="mb-4 text-2xl font-bold">
-        Buscar películas
-      </h1>
-
+     <h1 className="mb-4 text-2xl font-bold">
+  {tipo === "serie" ? "Buscar series" : "Buscar películas"}
+</h1>
       <form className="mb-6">
         <input
+  type="hidden"
+  name="tipo"
+  value={tipo ?? ""}
+/>
+        <input
           name="q"
-          placeholder="Escribe una película..."
+          placeholder={
+  tipo === "serie"
+    ? "Escribe una serie..."
+    : "Escribe una película..."
+}
           defaultValue={q ?? ""}
           className="rounded border p-2 text-black"
         />
@@ -30,7 +45,8 @@ export default async function Buscar({
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {datos?.results?.map((pelicula: {
           id: number;
-          title: string;
+          title?: string;
+          name?: string;   
           poster_path: string | null;
           overview: string;
         }) => (
@@ -38,7 +54,7 @@ export default async function Buscar({
             {pelicula.poster_path && (
               <img
                 src={`https://image.tmdb.org/t/p/w342${pelicula.poster_path}`}
-                alt={pelicula.title}
+                alt={pelicula.title ?? pelicula.name ?? ""}
                 className="rounded"
               />
             )}
@@ -46,7 +62,16 @@ export default async function Buscar({
 
 <BotonAgregarTMDB
   tmdbId={pelicula.id}
-  titulo={pelicula.title}
+  tipo={
+  tipo === "serie"
+    ? "serie"
+    : tipo === "pelicula"
+      ? "pelicula"
+      : pelicula.name
+        ? "serie"
+        : "pelicula"
+}
+  titulo={pelicula.title ?? pelicula.name ?? ""}
   poster={pelicula.poster_path}
   sinopsis={pelicula.overview}
 />
