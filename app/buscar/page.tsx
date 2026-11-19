@@ -1,4 +1,7 @@
 import { BotonAgregarTMDB } from "@/components/BotonAgregarTMDB";
+import { BuscadorInteligente } from "@/components/BuscadorInteligente";
+import { ContadoresVideoteca } from "@/components/ContadoresVideoteca";
+import { obtenerContadores } from "@/lib/peliculas";
 import { buscarPeliculas, buscarSeries, buscarTodo } from "@/lib/tmdb";
 export default async function Buscar({
   searchParams,
@@ -9,6 +12,7 @@ export default async function Buscar({
 }>;
 }) {
     const { q, tipo } = await searchParams;
+    const contadores = await obtenerContadores();
 const datos = q
   ? tipo === "serie"
     ? await buscarSeries(q)
@@ -18,31 +22,12 @@ const datos = q
   : null;
   return (
     <main className="p-8">
+      <ContadoresVideoteca contadores={contadores} />
      <h1 className="mb-4 text-2xl font-bold">
   {tipo === "serie" ? "Buscar series" : "Buscar películas"}
 </h1>
-      <form className="mb-6">
-        <input
-  type="hidden"
-  name="tipo"
-  value={tipo ?? ""}
-/>
-        <input
-          name="q"
-          placeholder={
-  tipo === "serie"
-    ? "Escribe una serie..."
-    : "Escribe una película..."
-}
-          defaultValue={q ?? ""}
-          className="rounded border p-2 text-black"
-        />
-        <button className="ml-2 rounded bg-blue-600 p-2 text-white">
-          Buscar
-        </button>
-      </form>
-
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+     <BuscadorInteligente />
+     <div className="grid grid-cols-2 gap-6 px-2 sm:px-0 md:grid-cols-4">
         {datos?.results?.map((pelicula: {
           id: number;
           title?: string;
