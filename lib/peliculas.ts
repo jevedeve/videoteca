@@ -51,3 +51,32 @@ export async function obtenerPeliculaPorId(
     },
   });
 }
+
+export async function obtenerContadores() {
+  const [
+    peliculasVistas,
+    peliculasPorVer,
+    seriesVistas,
+    seriesPorVer,
+  ] = await Promise.all([
+    prisma.pelicula.count({
+      where: { tipo: "pelicula", vista: true },
+    }),
+    prisma.pelicula.count({
+      where: { tipo: "pelicula", vista: false },
+    }),
+    prisma.pelicula.count({
+      where: { tipo: "serie", vista: true },
+    }),
+    prisma.pelicula.count({
+      where: { tipo: "serie", vista: false },
+    }),
+  ]);
+
+  return {
+    peliculasVistas,
+    peliculasPorVer,
+    seriesVistas,
+    seriesPorVer,
+  };
+}
