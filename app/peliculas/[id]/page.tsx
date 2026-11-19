@@ -6,6 +6,7 @@ import { EnlaceVolver } from "@/components/nav/EnlaceVolver";
 import { BotonVista } from "@/components/BotonVista";
 import { BotonBorrarPelicula } from "@/components/BotonBorrarPelicula";
 import { BotonValoracion } from "@/components/BotonValoracion";
+import { FormularioComentario } from "@/components/FormularioComentario";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,10 @@ export default async function PaginaPelicula(
           </section>
         )}
 
-
+        <FormularioComentario
+  id={pelicula.id}
+  comentario={pelicula.comentario}
+/>
         {pelicula.comentario ? (
           <p className="whitespace-pre-wrap text-base leading-8 text-texto">
             {pelicula.comentario}
