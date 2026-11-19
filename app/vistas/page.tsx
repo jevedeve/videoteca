@@ -1,8 +1,8 @@
 
 import type { Metadata } from "next";
 import { ListaPeliculas } from "@/components/ListaPeliculas";
-import { obtenerPeliculasVistas } from "@/lib/peliculas";
-
+import { obtenerPeliculasVistas, obtenerContadores } from "@/lib/peliculas";
+import { ContadoresVideoteca } from "@/components/ContadoresVideoteca";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -18,6 +18,7 @@ export default async function VistasPage({
     tipo === "pelicula" || tipo === "serie" ? tipo : undefined;
 
   const peliculas = await obtenerPeliculasVistas(tipoValido);
+  const contadores = await obtenerContadores();
   const cantidadPeliculas = peliculas.length;
 
  const textoCantidad =
@@ -38,6 +39,7 @@ export default async function VistasPage({
           {textoCantidad}
         </p>
       </header>
+      <ContadoresVideoteca contadores={contadores} />
 
       <ListaPeliculas
         peliculas={peliculas}

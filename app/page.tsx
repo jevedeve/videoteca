@@ -1,5 +1,6 @@
 
 import { ListaPeliculas } from "@/components/ListaPeliculas";
+import { ContadoresVideoteca } from "@/components/ContadoresVideoteca";
 import { obtenerPeliculas, obtenerContadores } from "@/lib/peliculas";
 export const dynamic = "force-dynamic";
 
@@ -51,32 +52,9 @@ export default async function InicioPage({
   </p>
 </header>
 
-<section
-  aria-label="Estadísticas de mi videoteca"
-  className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
->
-  {[
-    { titulo: "Películas vistas", cantidad: contadores.peliculasVistas, icono: "🎬" },
-    { titulo: "Películas por ver", cantidad: contadores.peliculasPorVer, icono: "🍿" },
-    { titulo: "Series vistas", cantidad: contadores.seriesVistas, icono: "📺" },
-    { titulo: "Series por ver", cantidad: contadores.seriesPorVer, icono: "⏳" },
-  ].map((contador) => (
-    <div
-      key={contador.titulo}
-      className="flex flex-col items-center gap-1 rounded-xl border border-borde bg-superficie px-3 py-4 text-center shadow-sm"
-    >
-      <span className="text-xl" aria-hidden="true">
-        {contador.icono}
-      </span>
-      <span className="text-2xl font-bold text-texto">
-        {contador.cantidad}
-      </span>
-      <span className="text-xs font-medium text-texto-secundario sm:text-sm">
-        {contador.titulo}
-      </span>
-    </div>
-  ))}
-</section>
+
+<ContadoresVideoteca contadores={contadores} />
+
 
 
 
