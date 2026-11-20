@@ -42,7 +42,6 @@ export default async function VistasPage({
     {tituloPagina}
   </h1>
 
-  <BuscadorInteligente />
 
         <p className="text-sm font-medium tracking-wide text-texto-secundario">
           {textoCantidad}

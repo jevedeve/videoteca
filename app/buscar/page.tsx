@@ -26,7 +26,6 @@ const datos = q
      <h1 className="mb-4 text-2xl font-bold">
   {tipo === "serie" ? "Buscar series" : "Buscar películas"}
 </h1>
-     <BuscadorInteligente />
      <div className="grid grid-cols-2 gap-6 px-2 sm:px-0 md:grid-cols-4">
         {datos?.results?.map((pelicula: {
           id: number;

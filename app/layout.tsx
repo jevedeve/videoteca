@@ -17,10 +17,11 @@ const fuenteGeistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Videoteca",
-    template: "%s | Videoteca",
+    default: "Videoteca 2.0 | Tu rincón de cine y series",
+    template: "%s | Videoteca 2.0",
   },
-  description: "Organiza las películas y series que quieres ver.",
+  description:
+    "Descubre películas y series, organiza lo que quieres ver, guarda tus favoritas y lleva el control de todo lo que has visto en Videoteca 2.0.",
 };
 
 export default function LayoutRaiz({

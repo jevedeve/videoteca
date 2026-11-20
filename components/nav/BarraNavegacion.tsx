@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { BuscadorInteligente } from "@/components/BuscadorInteligente";
 
 const menus = [
   { titulo: "Por ver", ruta: "/" },
@@ -28,7 +29,7 @@ export function BarraNavegacion() {
 
   return (
     <nav ref={navRef} className="border-b border-borde">
-      <div className="mx-auto flex max-w-4xl gap-4 px-4 py-4 text-sm font-medium">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3 text-sm font-medium">
         <Link
   href="/"
   onClick={() => setAbierto(null)}
@@ -72,7 +73,10 @@ export function BarraNavegacion() {
               </div>
             )}
           </div>
-        ))}
+               ))}
+        <div className="w-full min-w-0 sm:ml-auto sm:w-64">
+          <BuscadorInteligente />
+        </div>
       </div>
     </nav>
   );

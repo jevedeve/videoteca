@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 type Sugerencia = {
@@ -15,8 +15,33 @@ type Sugerencia = {
 export function BuscadorInteligente() {
   const [texto, setTexto] = useState("");
   const [resultados, setResultados] = useState<Sugerencia[]>([]);
+  const [abierto, setAbierto] = useState(false);
+  const contenedorRef = useRef<HTMLDivElement>(null);
   const [cargando, setCargando] = useState(false);
+  useEffect(() => {
+  function cerrarAlPulsarFuera(evento: PointerEvent) {
+    if (
+      contenedorRef.current &&
+      !contenedorRef.current.contains(evento.target as Node)
+    ) {
+      setAbierto(false);
+    }
+  }
 
+  function cerrarConEscape(evento: KeyboardEvent) {
+    if (evento.key === "Escape") {
+      setAbierto(false);
+    }
+  }
+
+  document.addEventListener("pointerdown", cerrarAlPulsarFuera);
+  document.addEventListener("keydown", cerrarConEscape);
+
+  return () => {
+    document.removeEventListener("pointerdown", cerrarAlPulsarFuera);
+    document.removeEventListener("keydown", cerrarConEscape);
+  };
+}, []);
   useEffect(() => {
     if (texto.trim().length < 2) {
       setResultados([]);
@@ -59,27 +84,28 @@ export function BuscadorInteligente() {
   }, [texto]);
 
   return (
-    <div className="relative my-4">
-      <form action="/buscar" className="flex gap-2">
+    <div ref={contenedorRef} className="relative my-4">
+        <form action="/buscar" className="relative w-full">
+  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-texto-secundario">
+    🔍
+  </span>
         <input
           type="search"
           name="q"
           value={texto}
-          onChange={(e) => setTexto(e.target.value)}
+          onChange={(e) => {
+  setTexto(e.target.value);
+  setAbierto(true);
+}}
+onFocus={() => setAbierto(true)}
           placeholder="Buscar películas o series..."
           aria-label="Buscar películas o series"
           autoComplete="off"
-          className="min-w-0 flex-1 rounded-lg border border-borde bg-transparent px-4 py-3 text-texto"
+          className="w-full min-w-0 rounded-xl border border-borde bg-superficie pl-10 pr-4 py-2.5 text-sm text-texto shadow-sm outline-none transition-all duration-200 placeholder:text-texto-secundario focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
         />
-        <button
-          type="submit"
-          className="rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white"
-        >
-          Buscar
-        </button>
+        
       </form>
-
-      {texto.trim().length >= 2 && (
+        {abierto && texto.trim().length >= 2 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-xl border border-borde bg-superficie p-2 shadow-xl">
           {cargando ? (
             <p className="p-3 text-sm text-texto-secundario">

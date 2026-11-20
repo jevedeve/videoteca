@@ -32,12 +32,18 @@ export function TarjetaPelicula({
           <img
             src={`https://image.tmdb.org/t/p/w500${pelicula.poster}`}
             alt={`Póster de ${pelicula.titulo}`}
-            className="aspect-[2/3] w-full rounded-xl object-cover"
+            className="aspect-[2/3] w-full rounded-xl object-cover shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl"
           />
         </Link>
       )}
 
-      <span className="w-fit rounded-full border border-borde px-3 py-1 text-xs font-semibold text-texto-secundario">
+     <span
+  className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
+    pelicula.tipo === "serie"
+     ? "border-purple-500 bg-purple-600/70 text-white"
+: "border-blue-500 bg-blue-600/70 text-white"
+  }`}
+>
   {pelicula.tipo === "serie" ? "📺 Serie" : "🎬 Película"}
 </span>
       <div className="flex items-start justify-between gap-4">
