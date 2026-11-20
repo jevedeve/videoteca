@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Film, Loader2, Search } from "lucide-react";
 
 type Sugerencia = {
   id: number;
@@ -84,35 +85,57 @@ export function BuscadorInteligente() {
   }, [texto]);
 
   return (
-    <div ref={contenedorRef} className="relative my-4">
-        <form action="/buscar" className="relative w-full">
-  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-texto-secundario">
-    🔍
-  </span>
+    <div ref={contenedorRef} className="relative my-3 w-full min-w-0">
+      <form action="/buscar" className="relative w-full">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-principal">
+          <Search className="h-4 w-4" aria-hidden="true" />
+        </span>
         <input
           type="search"
           name="q"
           value={texto}
           onChange={(e) => {
-  setTexto(e.target.value);
-  setAbierto(true);
-}}
-onFocus={() => setAbierto(true)}
+            setTexto(e.target.value);
+            setAbierto(true);
+          }}
+          onFocus={() => setAbierto(true)}
           placeholder="Buscar películas o series..."
           aria-label="Buscar películas o series"
+          aria-expanded={abierto && texto.trim().length >= 2}
+          aria-controls="sugerencias-busqueda"
           autoComplete="off"
-          className="w-full min-w-0 rounded-xl border border-borde bg-superficie pl-10 pr-4 py-2.5 text-sm text-texto shadow-sm outline-none transition-all duration-200 placeholder:text-texto-secundario focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          className="min-h-11 w-full min-w-0 rounded-xl border border-borde-secundario bg-fondo/90 py-2.5 pl-10 pr-10 text-sm text-texto shadow-sm transition-colors placeholder:text-texto-terciario focus:border-principal focus:outline-none focus:ring-2 focus:ring-principal/30"
         />
-        
+        {cargando && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-principal"
+          >
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </span>
+        )}
       </form>
-        {abierto && texto.trim().length >= 2 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-xl border border-borde bg-superficie p-2 shadow-xl">
+      {abierto && texto.trim().length >= 2 && (
+        <div
+          id="sugerencias-busqueda"
+          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-2xl border border-borde bg-superficie p-2 shadow-2xl sm:max-h-96"
+        >
           {cargando ? (
-            <p className="p-3 text-sm text-texto-secundario">
+            <p
+              role="status"
+              className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm text-texto-secundario"
+            >
+              <Loader2
+                className="h-4 w-4 animate-spin text-principal"
+                aria-hidden="true"
+              />
               Buscando...
             </p>
           ) : resultados.length === 0 ? (
-            <p className="p-3 text-sm text-texto-secundario">
+            <p
+              role="status"
+              className="rounded-xl px-3 py-3 text-sm text-texto-secundario"
+            >
               No hay sugerencias
             </p>
           ) : (
@@ -120,27 +143,32 @@ onFocus={() => setAbierto(true)}
               <Link
                 key={`${item.tipo}-${item.id}`}
                 href={`/buscar?q=${encodeURIComponent(item.titulo)}&tipo=${item.tipo}`}
-                className="flex items-center gap-3 rounded-lg p-2 hover:bg-borde"
+                className="group flex min-h-16 min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 transition-colors hover:bg-superficie-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-principal"
               >
-                {item.poster ? (
-                  <img
-                    src={`https://image.tmdb.org/t/p/w92${item.poster}`}
-                    alt=""
-                    className="h-14 w-10 rounded object-cover"
-                  />
-                ) : (
-                  <div className="h-14 w-10 rounded bg-borde" />
-                )}
+                <span className="flex h-14 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-borde bg-fondo">
+                  {item.poster ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w92${item.poster}`}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Film
+                      className="h-5 w-5 text-principal/70"
+                      aria-hidden="true"
+                    />
+                  )}
+                </span>
 
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-texto">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-texto group-hover:text-principal">
                     {item.titulo}
-                  </p>
-                  <p className="text-xs text-texto-secundario">
+                  </span>
+                  <span className="mt-0.5 block truncate text-xs text-texto-secundario">
                     {item.tipo === "serie" ? "Serie" : "Película"}
                     {item.anio ? ` · ${item.anio}` : ""}
-                  </p>
-                </div>
+                  </span>
+                </span>
               </Link>
             ))
           )}
