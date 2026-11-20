@@ -1,4 +1,5 @@
 
+import Link from "next/link";
 import { ListaPeliculas } from "@/components/ListaPeliculas";
 import { ContadoresVideoteca } from "@/components/ContadoresVideoteca";
 import { obtenerPeliculas, obtenerContadores } from "@/lib/peliculas";
@@ -52,6 +53,20 @@ export default async function InicioPage({
         ? "Tus series pendientes, reunidas para que siempre sepas qué sigue."
         : "Tu colección personal de cine y series, lista para descubrir tu próxima historia.";
 
+  const filtros = [
+    { nombre: "Todo", href: "/", activo: !tipoValido },
+    {
+      nombre: "Películas",
+      href: "/?tipo=pelicula",
+      activo: tipoValido === "pelicula",
+    },
+    {
+      nombre: "Series",
+      href: "/?tipo=serie",
+      activo: tipoValido === "serie",
+    },
+  ];
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10">
       <header className="relative overflow-hidden rounded-2xl border border-borde bg-gradient-to-br from-principal/10 via-superficie to-fondo p-5 shadow-lg sm:p-7">
@@ -80,6 +95,26 @@ export default async function InicioPage({
           </p>
         </div>
       </header>
+
+      <nav
+        aria-label="Filtrar películas y series por ver"
+        className="flex flex-wrap gap-2"
+      >
+        {filtros.map((filtro) => (
+          <Link
+            key={filtro.nombre}
+            href={filtro.href}
+            aria-current={filtro.activo ? "page" : undefined}
+            className={`inline-flex min-h-11 items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-principal ${
+              filtro.activo
+                ? "border-principal bg-principal text-texto-invertido shadow-sm"
+                : "border-borde bg-superficie text-texto-secundario hover:border-principal/50 hover:bg-superficie-hover hover:text-principal"
+            }`}
+          >
+            {filtro.nombre}
+          </Link>
+        ))}
+      </nav>
 
       <ContadoresVideoteca contadores={contadores} />
 
