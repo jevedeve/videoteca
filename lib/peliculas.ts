@@ -38,6 +38,26 @@ export async function obtenerPeliculasVistas(
   });
 }
 
+export async function obtenerSeriesGuardadasConTmdb() {
+  const series = await prisma.pelicula.findMany({
+    where: {
+      tipo: "serie",
+      tmdbId: { not: null },
+    },
+    select: {
+      tmdbId: true,
+      titulo: true,
+      poster: true,
+    },
+  });
+
+  return series.flatMap((serie) =>
+    serie.tmdbId === null
+      ? []
+      : [{ tmdbId: serie.tmdbId, titulo: serie.titulo, poster: serie.poster }]
+  );
+}
+
 /**
  * Obtiene una película por su identificador.
  * Devuelve null si no existe.

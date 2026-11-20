@@ -4,10 +4,18 @@ import { obtenerTrailer } from "@/lib/tmdb";
 type Props = {
   tmdbId: number;
   tipo: "pelicula" | "serie";
+  trailerUrl?: string | null;
 };
 
-export async function BotonTrailer({ tmdbId, tipo }: Props) {
-  const url = await obtenerTrailer(tmdbId, tipo);
+export async function BotonTrailer({
+  tmdbId,
+  tipo,
+  trailerUrl,
+}: Props) {
+  const url =
+    trailerUrl === undefined
+      ? await obtenerTrailer(tmdbId, tipo)
+      : trailerUrl;
 
   if (!url) return null;
 

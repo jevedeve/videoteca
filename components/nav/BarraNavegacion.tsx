@@ -61,6 +61,9 @@ export function BarraNavegacion() {
   ? [
       { texto: "🎟️ En cartelera", query: "?seccion=cartelera" },
       { texto: "📅 Próximamente", query: "?seccion=proximamente" },
+      { texto: "📺 Series en emisión", query: "?seccion=series-en-emision" },
+      { texto: "📅 Próximas series", query: "?seccion=series-proximas" },
+      { texto: "📺 Nuevas temporadas", query: "?seccion=nuevas-temporadas" },
     ]
   : [
       { texto: "Todo", query: "" },

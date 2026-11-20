@@ -1,9 +1,25 @@
 import { BotonAgregarTMDB } from "@/components/BotonAgregarTMDB";
 import {
+  obtenerProximasTemporadas,
   obtenerPeliculasEnCartelera,
   obtenerProximosEstrenos,
+  obtenerProximasSeries,
+  obtenerSeriesEnEmision,
 } from "@/lib/tmdb";
+import { obtenerSeriesGuardadasConTmdb } from "@/lib/peliculas";
 import { BotonTrailer } from "@/components/BotonTrailer";
+
+type ContenidoEstreno = {
+  id: string | number;
+  tmdbId: number;
+  titulo: string;
+  fecha: string | null;
+  poster: string | null;
+  sinopsis: string | null;
+  tipo: "pelicula" | "serie";
+  numeroTemporada?: number;
+  trailerUrl?: string | null;
+};
 
 export default async function EstrenosPage({
 
@@ -13,84 +29,174 @@ export default async function EstrenosPage({
 }) {
   const { seccion } = await searchParams;
 
+  const seriesEnEmision = seccion === "series-en-emision";
+  const seriesProximas = seccion === "series-proximas";
+  const nuevasTemporadas = seccion === "nuevas-temporadas";
+  const esSerie = seriesEnEmision || seriesProximas;
   const proximamente = seccion === "proximamente";
- const datos = proximamente
-  ? await obtenerProximosEstrenos()
-  : await obtenerPeliculasEnCartelera();
+  const datos = nuevasTemporadas
+    ? null
+    : seriesEnEmision
+      ? await obtenerSeriesEnEmision()
+      : seriesProximas
+        ? await obtenerProximasSeries()
+        : proximamente
+          ? await obtenerProximosEstrenos()
+          : await obtenerPeliculasEnCartelera();
 
-const peliculas = (datos?.results ?? []) as {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string | null;
-   overview: string;
-}[];
+  let contenidos: ContenidoEstreno[];
+
+  if (nuevasTemporadas) {
+    const seriesGuardadas = await obtenerSeriesGuardadasConTmdb();
+    const temporadas = await obtenerProximasTemporadas(seriesGuardadas);
+    contenidos = temporadas.map((temporada) => ({
+      id: `${temporada.tmdbId}:${temporada.numero}`,
+      tmdbId: temporada.tmdbId,
+      titulo: temporada.tituloSerie,
+      fecha: temporada.fechaEstreno,
+      poster: temporada.poster,
+      sinopsis: temporada.sinopsis,
+      tipo: "serie",
+      numeroTemporada: temporada.numero,
+      trailerUrl: temporada.trailerUrl,
+    }));
+  } else {
+    const resultados = (datos?.results ?? []) as {
+      id: number;
+      title?: string;
+      name?: string;
+      release_date?: string;
+      first_air_date?: string;
+      poster_path: string | null;
+      overview?: string | null;
+    }[];
+
+    contenidos = resultados.map((contenido) => ({
+      id: contenido.id,
+      tmdbId: contenido.id,
+      titulo: (esSerie ? contenido.name : contenido.title) ?? "",
+      fecha: esSerie ? contenido.first_air_date ?? null : contenido.release_date ?? null,
+      poster: contenido.poster_path,
+      sinopsis: contenido.overview ?? null,
+      tipo: esSerie ? "serie" : "pelicula",
+    }));
+  }
 
   return (
   <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
     <header className="overflow-hidden rounded-2xl border border-borde bg-gradient-to-br from-principal/10 via-superficie to-fondo p-5 shadow-sm sm:p-7">
       <div className="border-l-4 border-principal pl-4 sm:pl-5">
         <h1 className="text-3xl font-extrabold tracking-tight text-texto sm:text-4xl">
-          {proximamente ? "📅 Próximos estrenos" : "🎟️ En cartelera"}
+          {nuevasTemporadas
+            ? "📺 Nuevas temporadas"
+            : seriesProximas
+              ? "📅 Próximas series"
+              : seriesEnEmision
+                ? "📺 Series en emisión"
+                : proximamente
+                  ? "📅 Próximos estrenos"
+                  : "🎟️ En cartelera"}
         </h1>
 
         <p className="mt-3 max-w-2xl text-sm leading-6 text-texto-secundario sm:text-base">
-          {proximamente
-            ? "Descubre las películas que llegarán próximamente a los cines."
-            : "Descubre las películas que están actualmente en cartelera."}
+          {nuevasTemporadas
+            ? "Próximas temporadas con fecha confirmada de las series guardadas en tu videoteca."
+            : seriesProximas
+              ? "Series cuyo primer estreno está previsto para los próximos 90 días según TMDB. La fecha no garantiza disponibilidad en España."
+              : seriesEnEmision
+                ? "Series con episodios programados durante los próximos siete días según TMDB. Esto no implica disponibilidad en España."
+                : proximamente
+                  ? "Descubre las películas que llegarán próximamente a los cines."
+                  : "Descubre las películas que están actualmente en cartelera."}
         </p>
       </div>
     </header>
 
-    <section className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {peliculas.map((pelicula) => (
+    {nuevasTemporadas && contenidos.length === 0 ? (
+      <div
+        role="status"
+        className="mt-8 rounded-2xl border border-borde bg-superficie p-8 text-center shadow-sm"
+      >
+        <h2 className="text-lg font-semibold text-texto">
+          No hay nuevas temporadas anunciadas
+        </h2>
+        <p className="mt-2 text-sm text-texto-secundario">
+          TMDB no registra temporadas con una fecha futura conocida para las series de tu videoteca.
+        </p>
+      </div>
+    ) : (
+      <section className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {contenidos.map((contenido) => (
         <article
-          key={pelicula.id}
+          key={contenido.id}
           className="group flex flex-col overflow-hidden rounded-2xl border border-borde bg-superficie p-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-borde-fuerte hover:shadow-lg sm:p-5"
         >
-          {pelicula.poster_path && (
+          {contenido.poster && (
             <img
-              src={`https://image.tmdb.org/t/p/w500${pelicula.poster_path}`}
-              alt={`Póster de ${pelicula.title}`}
+              src={`https://image.tmdb.org/t/p/w500${contenido.poster}`}
+              alt={`Póster de ${contenido.titulo}`}
               className="aspect-[2/3] w-full rounded-xl object-cover shadow-md transition-transform duration-300 group-hover:scale-[1.01]"
             />
           )}
 
           <div className="flex flex-1 flex-col pt-5">
             <h2 className="text-lg font-bold leading-snug tracking-tight text-texto sm:text-xl">
-              {pelicula.title}
+              {contenido.titulo}
             </h2>
 
+            {contenido.numeroTemporada !== undefined && (
+              <p className="mt-1 text-sm font-semibold text-principal">
+                Temporada {contenido.numeroTemporada}
+              </p>
+            )}
+
             <p className="mt-2 text-xs font-medium uppercase tracking-wide text-texto-terciario">
-              Estreno: {pelicula.release_date || "Fecha no disponible"}
+              {contenido.numeroTemporada !== undefined
+                ? "Estreno de temporada: "
+                : contenido.tipo === "serie"
+                  ? seriesProximas
+                    ? "Primer estreno: "
+                    : "Primera emisión: "
+                  : "Estreno: "}
+              {contenido.fecha || "Fecha no disponible"}
             </p>
 
             <p className="mt-3 line-clamp-3 text-sm leading-6 text-texto-secundario">
-              {pelicula.overview?.trim() || "Sinopsis no disponible"}
+              {contenido.sinopsis?.trim() || "Sinopsis no disponible"}
             </p>
 
             <div className="mt-auto grid grid-cols-1 gap-3 pt-5 sm:grid-cols-2">
-              <div className="flex min-w-0 [&>button]:mt-0 [&>button]:inline-flex [&>button]:h-full [&>button]:min-h-11 [&>button]:w-full [&>button]:items-center [&>button]:justify-center [&>button]:px-2 [&>button]:text-center [&>button]:leading-tight [&>button]:whitespace-normal">
-                <BotonAgregarTMDB
-                  tmdbId={pelicula.id}
-                  titulo={pelicula.title}
-                  poster={pelicula.poster_path}
-                  sinopsis={pelicula.overview || null}
-                  tipo="pelicula"
-                />
+              <div className="flex min-w-0 items-stretch [&>button]:mt-0 [&>button]:inline-flex [&>button]:h-full [&>button]:min-h-11 [&>button]:w-full [&>button]:items-center [&>button]:justify-center [&>button]:px-2 [&>button]:text-center [&>button]:leading-tight [&>button]:whitespace-normal">
+                {nuevasTemporadas ? (
+                  <span className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-borde bg-fondo px-2 py-2 text-center text-sm font-semibold text-texto-secundario">
+                    Ya está en tu videoteca
+                  </span>
+                ) : (
+                  <BotonAgregarTMDB
+                    tmdbId={contenido.tmdbId}
+                    titulo={contenido.titulo}
+                    poster={contenido.poster}
+                    sinopsis={contenido.sinopsis}
+                    tipo={contenido.tipo}
+                  />
+                )}
               </div>
 
-              <div className="flex min-w-0 [&>a]:inline-flex [&>a]:h-full [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-center [&>a]:px-2 [&>a]:text-center [&>a]:leading-tight [&>a]:whitespace-normal">
+              <div className="flex min-w-0 items-stretch [&>a]:inline-flex [&>a]:h-full [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-center [&>a]:px-2 [&>a]:text-center [&>a]:leading-tight [&>a]:whitespace-normal">
                 <BotonTrailer
-                  tmdbId={pelicula.id}
-                  tipo="pelicula"
+                  tmdbId={contenido.tmdbId}
+                  tipo={contenido.tipo}
+                  trailerUrl={
+                    nuevasTemporadas ? contenido.trailerUrl : undefined
+                  }
                 />
               </div>
             </div>
           </div>
         </article>
       ))}
-    </section>
+      </section>
+    )}
     </main>
   );
 }
