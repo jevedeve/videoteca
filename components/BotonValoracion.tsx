@@ -21,13 +21,20 @@ export function BotonValoracion({ id, valoracion }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span>⭐ Valoración:</span>
+    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+      <label
+        htmlFor={`valoracion-${id}`}
+        className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-texto-secundario"
+      >
+        <span aria-hidden="true">⭐</span>
+        Valoración
+      </label>
 
       <select
+        id={`valoracion-${id}`}
         value={valoracion ?? ""}
         onChange={(e) => cambiarValoracion(Number(e.target.value))}
-        className="rounded-lg border border-borde bg-superficie p-2"
+        className="min-h-11 min-w-0 flex-1 rounded-xl border border-borde-secundario bg-superficie px-3 py-2 text-sm font-semibold text-texto shadow-sm transition-colors hover:border-borde-fuerte focus-visible:border-principal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-principal/30"
       >
         <option value="" disabled>
           Sin puntuar
