@@ -144,3 +144,51 @@ export async function obtenerTrailer(
 
   return null;
 }
+export async function obtenerPeliculasEnCartelera() {
+  const clave = process.env.TMDB_API_KEY;
+
+  if (!clave) {
+    throw new Error("Falta la clave API de TMDB");
+  }
+
+  const url = new URL(`${TMDB_URL}/movie/now_playing`);
+
+  url.searchParams.set("api_key", clave);
+  url.searchParams.set("language", "es-ES");
+  url.searchParams.set("region", "ES");
+  url.searchParams.set("page", "1");
+
+  const respuesta = await fetch(url, {
+    next: { revalidate: 3600 },
+  });
+
+  if (!respuesta.ok) {
+    throw new Error("Error al consultar la cartelera");
+  }
+
+  return respuesta.json();
+}
+export async function obtenerProximosEstrenos() {
+  const clave = process.env.TMDB_API_KEY;
+
+  if (!clave) {
+    throw new Error("Falta la clave API de TMDB");
+  }
+
+  const url = new URL(`${TMDB_URL}/movie/upcoming`);
+
+  url.searchParams.set("api_key", clave);
+  url.searchParams.set("language", "es-ES");
+  url.searchParams.set("region", "ES");
+  url.searchParams.set("page", "1");
+
+  const respuesta = await fetch(url, {
+    next: { revalidate: 3600 },
+  });
+
+  if (!respuesta.ok) {
+    throw new Error("Error al consultar los próximos estrenos");
+  }
+
+  return respuesta.json();
+}

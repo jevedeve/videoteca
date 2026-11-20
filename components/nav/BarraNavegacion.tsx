@@ -9,6 +9,7 @@ import { BuscadorInteligente } from "@/components/BuscadorInteligente";
 const menus = [
   { titulo: "Por ver", ruta: "/" },
   { titulo: "Vistas", ruta: "/vistas" },
+  { titulo: "🎬 Estrenos", ruta: "/estrenos" },
 ];
 
 export function BarraNavegacion() {
@@ -56,11 +57,17 @@ export function BarraNavegacion() {
 
             {abierto === menu.ruta && (
               <div className="absolute left-0 top-full z-50 mt-2 min-w-36 rounded-xl border border-borde bg-superficie p-2 shadow-lg">
-                {[
-                  { texto: "Todo", query: "" },
-                  { texto: "Películas", query: "?tipo=pelicula" },
-                  { texto: "Series", query: "?tipo=serie" },
-                ].map((opcion) => (
+                {(menu.ruta === "/estrenos"
+  ? [
+      { texto: "🎟️ En cartelera", query: "?seccion=cartelera" },
+      { texto: "📅 Próximamente", query: "?seccion=proximamente" },
+    ]
+  : [
+      { texto: "Todo", query: "" },
+      { texto: "Películas", query: "?tipo=pelicula" },
+      { texto: "Series", query: "?tipo=serie" },
+    ]
+).map((opcion) => (
                   <Link
                     key={opcion.texto}
                     href={`${menu.ruta}${opcion.query}`}
