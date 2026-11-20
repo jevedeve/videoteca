@@ -57,6 +57,9 @@ const peliculas = (datos?.results ?? []) as {
       <p className="mt-2 text-sm text-texto-secundario">
         Estreno: {pelicula.release_date || "Fecha no disponible"}
       </p>
+      <p className="mt-2 line-clamp-3 text-sm leading-6 text-texto-secundario">
+        {pelicula.overview?.trim() || "Sinopsis no disponible"}
+      </p>
   <div className="mt-4 flex flex-wrap items-center gap-3">
   <BotonAgregarTMDB
     tmdbId={pelicula.id}
