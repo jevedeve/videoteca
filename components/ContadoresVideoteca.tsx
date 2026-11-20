@@ -49,15 +49,20 @@ export function ContadoresVideoteca({
         <Link
           key={contador.titulo}
           href={contador.href}
-          className="flex flex-col items-center gap-1 rounded-xl border border-borde bg-superficie px-3 py-4 text-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          className="group flex min-h-28 min-w-0 flex-col justify-between rounded-2xl border border-borde bg-gradient-to-br from-superficie to-fondo p-4 text-left shadow-sm transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-principal/50 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-principal motion-reduce:transition-none"
         >
-          <span className="text-xl" aria-hidden="true">
-            {contador.icono}
-          </span>
-          <span className="text-2xl font-bold text-texto">
-            {contador.cantidad}
-          </span>
-          <span className="text-xs font-medium text-texto-secundario sm:text-sm">
+          <div className="flex items-start justify-between gap-2">
+            <span
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-borde bg-fondo text-xl"
+              aria-hidden="true"
+            >
+              {contador.icono}
+            </span>
+            <span className="text-3xl font-bold tabular-nums tracking-tight text-principal">
+              {contador.cantidad}
+            </span>
+          </div>
+          <span className="mt-3 text-xs font-medium leading-snug text-texto-secundario sm:text-sm">
             {contador.titulo}
           </span>
         </Link>

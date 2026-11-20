@@ -2,104 +2,24 @@
 @import "tailwindcss";
 
 /* =========================================
-   CONFIGURACIÓN DEL TEMA
+   PALETA GLOBAL - MODO OSCURO
 ========================================= */
-
-@custom-variant oscuro (@media (prefers-color-scheme: dark));
-/* =========================================
-   PALETA GLOBAL - MODO CLARO
-========================================= */
-
-
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  /* Colores principales - Beige arena */
-  --color-principal: #C8B47F;
-  --color-principal-hover: #B7A16A;
-  --color-principal-activo: #9A8552;
-  --color-principal-suave: #F3EEDC;
-  --color-principal-texto: #51452D;
-
-  /* Colores secundarios - Grafito */
-  --color-secundario: #34363A;
-  --color-secundario-hover: #25272B;
-  --color-secundario-suave: #E9E8E4;
-
-  /* Fondos */
-  --color-fondo: #F5F5F3;
-  --color-fondo-secundario: #ECEBE7;
-  --color-fondo-terciario: #E2E0DA;
-  --color-fondo-invertido: #292A2C;
-
-  /* Superficies */
-  --color-superficie: #FBFAF7;
-  --color-superficie-hover: #F0EEE8;
-  --color-superficie-activa: #E7E3D9;
-  --color-superficie-elevada: #FFFFFF;
-
-  /* Textos */
-  --color-texto: #252522;
-  --color-texto-secundario: #4C4B46;
-  --color-texto-terciario: #65645E;
-  --color-texto-desactivado: #85847E;
-  --color-texto-invertido: #FFFFFF;
-
-  /* Bordes */
-  --color-borde: #DAD9D3;
-  --color-borde-secundario: #C5C3BB;
-  --color-borde-fuerte: #89877E;
-  --color-borde-enfocado: #806B3D;
-
-  /* Estados */
-  --color-exito: #267044;
-  --color-exito-suave: #E1F0E5;
-
-  --color-advertencia: #88600C;
-  --color-advertencia-suave: #F8EECF;
-
-  --color-error: #B52E2E;
-  --color-error-suave: #F9E4E1;
-
-  --color-informacion: #276681;
-  --color-informacion-suave: #E1EDF2;
-
-  /* Escala de grises cálidos */
-  --gris-50: #FBFAF7;
-  --gris-100: #F5F5F3;
-  --gris-200: #ECEBE7;
-  --gris-300: #DAD9D3;
-  --gris-400: #B7B6AF;
-  --gris-500: #85847E;
-  --gris-600: #65645E;
-  --gris-700: #4C4B46;
-  --gris-800: #34363A;
-  --gris-900: #25272B;
-  --gris-950: #1C1D20;
-}
-
-
-/* =========================================
-   MODO OSCURO
-========================================= */
-
-.oscuro {
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  /* Colores principales */
+  /* Dorado arena */
   --color-principal: #D8C79A;
   --color-principal-hover: #E5D6B0;
   --color-principal-activo: #C6B27F;
   --color-principal-suave: #403B2D;
   --color-principal-texto: #F1E7CB;
 
-  /* Colores secundarios */
+  /* Grafito */
   --color-secundario: #C5C4BD;
   --color-secundario-hover: #DEDDD5;
   --color-secundario-suave: #3B3C39;
 
-  /* Fondos */
+  /* Fondo carbón */
   --color-fondo: #202120;
   --color-fondo-secundario: #292A28;
   --color-fondo-terciario: #343530;
@@ -148,9 +68,12 @@
   --gris-700: #C5C4BD;
   --gris-800: #DAD9D3;
   --gris-900: #ECEBE7;
-    --gris-950: #F5F5F3;
-  }
+  --gris-950: #F5F5F3;
 }
+
+::placeholder {
+  color: var(--color-texto-terciario);
+  opacity: 1;
 }
 
 /* =========================================
