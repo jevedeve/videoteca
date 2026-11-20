@@ -34,7 +34,7 @@ export function BarraNavegacion() {
         <Link
   href="/"
   onClick={() => setAbierto(null)}
-  className="rounded-lg px-3 py-2 font-semibold text-principal hover:bg-superficie"
+  className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 font-semibold text-principal hover:bg-superficie"
 >
   🏠 Inicio
 </Link>
@@ -46,7 +46,7 @@ export function BarraNavegacion() {
               onClick={() =>
                 setAbierto(abierto === menu.ruta ? null : menu.ruta)
               }
-              className={`rounded-lg px-3 py-2 hover:bg-superficie ${
+              className={`min-h-11 rounded-lg px-3 py-2 hover:bg-superficie ${
                 pathname === menu.ruta
                   ? "font-bold text-principal"
                   : "text-texto"
@@ -75,7 +75,7 @@ export function BarraNavegacion() {
                     key={opcion.texto}
                     href={`${menu.ruta}${opcion.query}`}
                     onClick={() => setAbierto(null)}
-                    className="block rounded-lg px-3 py-2 hover:bg-fondo"
+                    className="flex min-h-11 items-center rounded-lg px-3 py-2 hover:bg-fondo"
                   >
                     {opcion.texto}
                   </Link>

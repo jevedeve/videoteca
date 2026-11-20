@@ -1,3 +1,4 @@
+import { Film } from "lucide-react";
 import { BotonAgregarTMDB } from "@/components/BotonAgregarTMDB";
 import {
   obtenerProximasTemporadas,
@@ -131,13 +132,26 @@ export default async function EstrenosPage({
           key={contenido.id}
           className="group flex flex-col overflow-hidden rounded-2xl border border-borde bg-superficie p-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-borde-fuerte hover:shadow-lg sm:p-5"
         >
-          {contenido.poster && (
-            <img
-              src={`https://image.tmdb.org/t/p/w500${contenido.poster}`}
-              alt={`Póster de ${contenido.titulo}`}
-              className="aspect-[2/3] w-full rounded-xl object-cover shadow-md transition-transform duration-300 group-hover:scale-[1.01]"
-            />
-          )}
+          <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl border border-borde bg-fondo-secundario shadow-md">
+            {contenido.poster ? (
+              <img
+                src={`https://image.tmdb.org/t/p/w500${contenido.poster}`}
+                alt={`Póster de ${contenido.titulo}`}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+              />
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-fondo-secundario via-superficie to-fondo p-6 text-center">
+                <Film
+                  className="h-12 w-12 text-principal/80"
+                  strokeWidth={1.25}
+                  aria-hidden="true"
+                />
+                <span className="text-sm font-medium text-texto-terciario">
+                  Póster no disponible
+                </span>
+              </div>
+            )}
+          </div>
 
           <div className="flex flex-1 flex-col pt-5">
             <h2 className="text-lg font-bold leading-snug tracking-tight text-texto sm:text-xl">
