@@ -9,6 +9,8 @@ import {
 } from "@/lib/tmdb";
 import { obtenerSeriesGuardadasConTmdb } from "@/lib/peliculas";
 import { BotonTrailer } from "@/components/BotonTrailer";
+import { MenuEntradas } from "@/components/MenuEntradas";
+import { obtenerPreventaConfirmada } from "@/lib/entradas-cine";
 
 type ContenidoEstreno = {
   id: string | number;
@@ -35,6 +37,8 @@ export default async function EstrenosPage({
   const nuevasTemporadas = seccion === "nuevas-temporadas";
   const esSerie = seriesEnEmision || seriesProximas;
   const proximamente = seccion === "proximamente";
+  const enCartelera =
+    !seriesEnEmision && !seriesProximas && !nuevasTemporadas && !proximamente;
   const datos = nuevasTemporadas
     ? null
     : seriesEnEmision
@@ -127,7 +131,16 @@ export default async function EstrenosPage({
       </div>
     ) : (
       <section className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {contenidos.map((contenido) => (
+      {contenidos.map((contenido) => {
+        const preventa =
+          proximamente && contenido.tipo === "pelicula"
+            ? obtenerPreventaConfirmada(contenido.tmdbId)
+            : null;
+        const [anio, mes, dia] = preventa?.verificadaEn.split("-") ?? [];
+        const fechaVerificacion =
+          anio && mes && dia ? `${dia}/${mes}/${anio}` : preventa?.verificadaEn;
+
+        return (
         <article
           key={contenido.id}
           className="group flex flex-col overflow-hidden rounded-2xl border border-borde bg-superficie p-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-borde-fuerte hover:shadow-lg sm:p-5"
@@ -205,10 +218,36 @@ export default async function EstrenosPage({
                   }
                 />
               </div>
+
+              {enCartelera && contenido.tipo === "pelicula" && (
+                <MenuEntradas />
+              )}
+
+              {preventa && fechaVerificacion && (
+                <div className="flex min-w-0 flex-col items-start gap-1 sm:col-span-2">
+                  <a
+                    href={preventa.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Comprar entradas en preventa para ${contenido.titulo}. Verificada el ${fechaVerificacion}`}
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-principal/30 bg-principal px-3 py-2 text-sm font-semibold text-texto-invertido transition-colors hover:bg-principal-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-principal"
+                  >
+                    Preventa
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                  <time
+                    dateTime={preventa.verificadaEn}
+                    className="text-xs text-texto-terciario"
+                  >
+                    Verificada el {fechaVerificacion}
+                  </time>
+                </div>
+              )}
             </div>
           </div>
         </article>
-      ))}
+        );
+      })}
       </section>
     )}
     </main>
