@@ -38,6 +38,16 @@ export function BarraNavegacion() {
 >
   🏠 Inicio
 </Link>
+        <Link
+          href="/triviafriki"
+          onClick={() => setAbierto(null)}
+          aria-current={pathname === "/triviafriki" ? "page" : undefined}
+          className={`inline-flex min-h-11 items-center rounded-lg px-3 py-2 font-semibold hover:bg-superficie ${
+            pathname === "/triviafriki" ? "text-principal" : "text-texto"
+          }`}
+        >
+          Triviafriki
+        </Link>
         {menus.map((menu) => (
           <div key={menu.ruta} className="relative">
             <button
