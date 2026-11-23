@@ -1,4 +1,30 @@
+import {
+  CACHE_REVALIDATE_SEGUNDOS,
+  MAX_PAGINAS_DISCOVER_ES,
+  MAX_PAGINAS_DISCOVER_INTERNACIONAL,
+  combinarEstrenosFuturos,
+  obtenerFechaHoyMadrid,
+  obtenerHastaPaginas,
+} from "@/lib/proximos-estrenos";
+
 const TMDB_URL = "https://api.themoviedb.org/3";
+
+type ResultadoBusquedaTMDB = {
+  id: number;
+  title?: string;
+  poster_path?: string | null;
+  overview?: string | null;
+  release_date?: string;
+};
+
+type RespuestaBusquedaTMDB = {
+  results: ResultadoBusquedaTMDB[];
+  total_pages?: number;
+};
+
+type ResultadoProximoEstrenoTMDB = ResultadoBusquedaTMDB & {
+  origenFecha: "es" | "internacional";
+};
 
 type SerieGuardada = {
   tmdbId: number;
@@ -262,29 +288,81 @@ export async function obtenerPeliculasEnCartelera() {
 
   return respuesta.json();
 }
-export async function obtenerProximosEstrenos() {
+async function obtenerPaginaDiscoverProximosEstrenos(
+  clave: string,
+  pagina: number,
+  desde: string,
+  hasta: string,
+  region: "ES" | null
+): Promise<RespuestaBusquedaTMDB> {
+  const url = new URL(`${TMDB_URL}/discover/movie`);
+  url.searchParams.set("api_key", clave);
+  url.searchParams.set("language", "es-ES");
+  url.searchParams.set("include_adult", "false");
+  url.searchParams.set("sort_by", "primary_release_date.asc");
+  url.searchParams.set("page", String(pagina));
+
+  if (region === "ES") {
+    url.searchParams.set("region", "ES");
+    url.searchParams.set("release_date.gte", desde);
+    url.searchParams.set("release_date.lte", hasta);
+    url.searchParams.set("with_release_type", "2|3");
+  } else {
+    url.searchParams.set("primary_release_date.gte", desde);
+    url.searchParams.set("primary_release_date.lte", hasta);
+  }
+
+  const respuesta = await fetch(url, {
+    next: { revalidate: CACHE_REVALIDATE_SEGUNDOS },
+  });
+
+  if (!respuesta.ok) {
+    throw new Error(
+      `Error al consultar los próximos estrenos${region === "ES" ? " en España" : " internacionales"}`
+    );
+  }
+
+  return (await respuesta.json()) as RespuestaBusquedaTMDB;
+}
+
+export async function obtenerProximosEstrenos(): Promise<{
+  results: ResultadoProximoEstrenoTMDB[];
+}> {
   const clave = process.env.TMDB_API_KEY;
 
   if (!clave) {
     throw new Error("Falta la clave API de TMDB");
   }
 
-  const url = new URL(`${TMDB_URL}/movie/upcoming`);
+  const hoy = obtenerFechaHoyMadrid();
+  const limite = sumarDoceMeses(hoy);
+  const consultarPaginas = (region: "ES" | null) =>
+    obtenerHastaPaginas(
+      (pagina) =>
+        obtenerPaginaDiscoverProximosEstrenos(
+          clave,
+          pagina,
+          hoy,
+          limite,
+          region
+        ),
+      region === "ES"
+        ? MAX_PAGINAS_DISCOVER_ES
+        : MAX_PAGINAS_DISCOVER_INTERNACIONAL
+    );
+  const [peliculasEspanolas, peliculasInternacionales] = await Promise.all([
+    consultarPaginas("ES"),
+    consultarPaginas(null),
+  ]);
 
-  url.searchParams.set("api_key", clave);
-  url.searchParams.set("language", "es-ES");
-  url.searchParams.set("region", "ES");
-  url.searchParams.set("page", "1");
-
-  const respuesta = await fetch(url, {
-    next: { revalidate: 3600 },
-  });
-
-  if (!respuesta.ok) {
-    throw new Error("Error al consultar los próximos estrenos");
-  }
-
-  return respuesta.json();
+  return {
+    results: combinarEstrenosFuturos(
+      peliculasEspanolas,
+      peliculasInternacionales,
+      hoy,
+      limite
+    ),
+  };
 }
 
 export async function obtenerSeriesEnEmision() {

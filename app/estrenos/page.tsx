@@ -11,6 +11,7 @@ import { obtenerSeriesGuardadasConTmdb } from "@/lib/peliculas";
 import { BotonTrailer } from "@/components/BotonTrailer";
 import { MenuEntradas } from "@/components/MenuEntradas";
 import { obtenerPreventaConfirmada } from "@/lib/entradas-cine";
+import type { OrigenFechaEstreno } from "@/lib/proximos-estrenos";
 
 type ContenidoEstreno = {
   id: string | number;
@@ -20,6 +21,7 @@ type ContenidoEstreno = {
   poster: string | null;
   sinopsis: string | null;
   tipo: "pelicula" | "serie";
+  origenFecha?: OrigenFechaEstreno;
   numeroTemporada?: number;
   trailerUrl?: string | null;
 };
@@ -72,6 +74,7 @@ export default async function EstrenosPage({
       name?: string;
       release_date?: string;
       first_air_date?: string;
+      origenFecha?: OrigenFechaEstreno;
       poster_path: string | null;
       overview?: string | null;
     }[];
@@ -84,6 +87,7 @@ export default async function EstrenosPage({
       poster: contenido.poster_path,
       sinopsis: contenido.overview ?? null,
       tipo: esSerie ? "serie" : "pelicula",
+      origenFecha: proximamente ? contenido.origenFecha : undefined,
     }));
   }
 
@@ -178,14 +182,18 @@ export default async function EstrenosPage({
             )}
 
             <p className="mt-2 text-xs font-medium uppercase tracking-wide text-texto-terciario">
-              {contenido.numeroTemporada !== undefined
-                ? "Estreno de temporada: "
-                : contenido.tipo === "serie"
-                  ? seriesProximas
-                    ? "Primer estreno: "
-                    : "Primera emisión: "
-                  : "Estreno: "}
-              {contenido.fecha || "Fecha no disponible"}
+              {proximamente
+                ? contenido.fecha
+                  ? `${contenido.origenFecha === "es" ? "Estreno en Espa\u00f1a: " : "Fecha internacional (sin confirmar en Espa\u00f1a): "}${contenido.fecha}`
+                  : "Fecha por confirmar"
+                : contenido.numeroTemporada !== undefined
+                  ? "Estreno de temporada: "
+                  : contenido.tipo === "serie"
+                    ? seriesProximas
+                      ? "Primer estreno: "
+                      : "Primera emisi\u00f3n: "
+                    : "Estreno: "}
+              {!proximamente && (contenido.fecha || "Fecha no disponible")}
             </p>
 
             <p className="mt-3 line-clamp-3 text-sm leading-6 text-texto-secundario">
