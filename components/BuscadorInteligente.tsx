@@ -13,67 +13,120 @@ type Sugerencia = {
   tipo: "pelicula" | "serie";
 };
 
+type RespuestaSugerencias = {
+  results?: Sugerencia[];
+  page?: number;
+  total_pages?: number;
+};
+
+function combinarSinDuplicados(
+  actuales: Sugerencia[],
+  nuevas: Sugerencia[]
+): Sugerencia[] {
+  const ids = new Set(
+    actuales.map((item) => `${item.tipo}:${item.id}`)
+  );
+  const combinadas = [...actuales];
+
+  for (const item of nuevas) {
+    const clave = `${item.tipo}:${item.id}`;
+    if (!ids.has(clave)) {
+      ids.add(clave);
+      combinadas.push(item);
+    }
+  }
+
+  return combinadas;
+}
+
 export function BuscadorInteligente() {
   const [texto, setTexto] = useState("");
   const [resultados, setResultados] = useState<Sugerencia[]>([]);
   const [abierto, setAbierto] = useState(false);
   const contenedorRef = useRef<HTMLDivElement>(null);
   const [cargando, setCargando] = useState(false);
-  useEffect(() => {
-  function cerrarAlPulsarFuera(evento: PointerEvent) {
-    if (
-      contenedorRef.current &&
-      !contenedorRef.current.contains(evento.target as Node)
-    ) {
-      setAbierto(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
+  const [hayMas, setHayMas] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pagina, setPagina] = useState(1);
+  const solicitudRef = useRef<AbortController | null>(null);
+  const cargandoMasRef = useRef(false);
+
+  async function solicitarSugerencias(
+    query: string,
+    paginaSolicitada: number,
+    signal: AbortSignal
+  ): Promise<RespuestaSugerencias> {
+    const respuesta = await fetch(
+      `/api/sugerencias?q=${encodeURIComponent(query)}&page=${paginaSolicitada}`,
+      { signal }
+    );
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudieron cargar las sugerencias");
     }
+
+    return respuesta.json();
   }
 
-  function cerrarConEscape(evento: KeyboardEvent) {
-    if (evento.key === "Escape") {
-      setAbierto(false);
-    }
-  }
-
-  document.addEventListener("pointerdown", cerrarAlPulsarFuera);
-  document.addEventListener("keydown", cerrarConEscape);
-
-  return () => {
-    document.removeEventListener("pointerdown", cerrarAlPulsarFuera);
-    document.removeEventListener("keydown", cerrarConEscape);
-  };
-}, []);
   useEffect(() => {
-    if (texto.trim().length < 2) {
-      setResultados([]);
-      setCargando(false);
+    function cerrarAlPulsarFuera(evento: PointerEvent) {
+      if (
+        contenedorRef.current &&
+        !contenedorRef.current.contains(evento.target as Node)
+      ) {
+        setAbierto(false);
+      }
+    }
+
+    function cerrarConEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") {
+        setAbierto(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", cerrarAlPulsarFuera);
+    document.addEventListener("keydown", cerrarConEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", cerrarAlPulsarFuera);
+      document.removeEventListener("keydown", cerrarConEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    const query = texto.trim();
+    solicitudRef.current?.abort();
+    cargandoMasRef.current = false;
+
+    if (query.length < 2) {
       return;
     }
 
     const controlador = new AbortController();
-    setCargando(true);
-    setResultados([]);
+    solicitudRef.current = controlador;
 
     const temporizador = setTimeout(async () => {
       try {
-        const respuesta = await fetch(
-          `/api/sugerencias?q=${encodeURIComponent(texto.trim())}`,
-          { signal: controlador.signal }
+        const datos = await solicitarSugerencias(
+          query,
+          1,
+          controlador.signal
         );
-
-        if (!respuesta.ok) {
-          throw new Error("Error al buscar");
+        if (!controlador.signal.aborted) {
+          setResultados(combinarSinDuplicados([], datos.results ?? []));
+          const paginaRespuesta = datos.page ?? 1;
+          setPagina(paginaRespuesta);
+          setHayMas(paginaRespuesta < (datos.total_pages ?? paginaRespuesta));
         }
-
-        const datos = await respuesta.json();
-        setResultados(datos.results ?? []);
       } catch {
         if (!controlador.signal.aborted) {
-          setResultados([]);
+          setError("No se pudieron cargar las sugerencias.");
         }
       } finally {
         if (!controlador.signal.aborted) {
           setCargando(false);
+          solicitudRef.current = null;
         }
       }
     }, 350);
@@ -81,8 +134,56 @@ export function BuscadorInteligente() {
     return () => {
       clearTimeout(temporizador);
       controlador.abort();
+      if (solicitudRef.current === controlador) {
+        solicitudRef.current = null;
+      }
     };
   }, [texto]);
+
+  async function cargarMas() {
+    const query = texto.trim();
+    if (
+      query.length < 2 ||
+      !hayMas ||
+      cargando ||
+      cargandoMasRef.current
+    ) {
+      return;
+    }
+
+    const controlador = new AbortController();
+    solicitudRef.current?.abort();
+    solicitudRef.current = controlador;
+    cargandoMasRef.current = true;
+    setCargandoMas(true);
+    setError(null);
+
+    try {
+      const datos = await solicitarSugerencias(
+        query,
+        pagina + 1,
+        controlador.signal
+      );
+      if (!controlador.signal.aborted) {
+        setResultados((actuales) =>
+          combinarSinDuplicados(actuales, datos.results ?? [])
+        );
+        const paginaRespuesta = datos.page ?? pagina + 1;
+        setPagina(paginaRespuesta);
+        setHayMas(paginaRespuesta < (datos.total_pages ?? paginaRespuesta));
+      }
+    } catch {
+      if (!controlador.signal.aborted) {
+        setError("No se pudieron cargar más sugerencias.");
+      }
+    } finally {
+      if (!controlador.signal.aborted) {
+        cargandoMasRef.current = false;
+        setCargandoMas(false);
+        solicitudRef.current = null;
+      }
+    }
+  }
 
   return (
     <div ref={contenedorRef} className="relative my-3 w-full min-w-0">
@@ -95,8 +196,17 @@ export function BuscadorInteligente() {
           name="q"
           value={texto}
           onChange={(e) => {
-            setTexto(e.target.value);
+            const nuevoTexto = e.target.value;
+            setTexto(nuevoTexto);
             setAbierto(true);
+            setPagina(1);
+            setResultados([]);
+            setHayMas(false);
+            setError(null);
+            setCargando(nuevoTexto.trim().length >= 2);
+            solicitudRef.current?.abort();
+            cargandoMasRef.current = false;
+            setCargandoMas(false);
           }}
           onFocus={() => setAbierto(true)}
           placeholder="Buscar películas o series..."
@@ -130,6 +240,13 @@ export function BuscadorInteligente() {
                 aria-hidden="true"
               />
               Buscando...
+            </p>
+          ) : error && resultados.length === 0 ? (
+            <p
+              role="alert"
+              className="rounded-xl px-3 py-3 text-sm text-texto-secundario"
+            >
+              {error}
             </p>
           ) : resultados.length === 0 ? (
             <p
@@ -171,6 +288,34 @@ export function BuscadorInteligente() {
                 </span>
               </Link>
             ))
+          )}
+          {error && resultados.length > 0 && (
+            <p
+              role="alert"
+              className="rounded-xl px-3 py-2 text-sm text-texto-secundario"
+            >
+              {error}
+            </p>
+          )}
+          {!cargando && hayMas && (
+            <button
+              type="button"
+              onClick={cargarMas}
+              disabled={cargandoMas}
+              className="mt-1 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-principal transition-colors hover:bg-superficie-hover disabled:cursor-wait disabled:opacity-70"
+            >
+              {cargandoMas ? (
+                <>
+                  <Loader2
+                    className="h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                  Cargando...
+                </>
+              ) : (
+                "Ver más"
+              )}
+            </button>
           )}
         </div>
       )}

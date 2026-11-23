@@ -6,6 +6,7 @@ import {
   obtenerFechaHoyMadrid,
   obtenerHastaPaginas,
 } from "@/lib/proximos-estrenos";
+import { consultarPaginaBusquedaTMDB } from "@/lib/tmdb-paginacion";
 
 const TMDB_URL = "https://api.themoviedb.org/3";
 
@@ -120,68 +121,59 @@ async function mapConcurrenciaLimitada<T, R>(
   return resultados;
 }
 
-export async function buscarPeliculas(titulo: string) {
+export async function buscarPeliculas(titulo: string, pagina = 1) {
   const clave = process.env.TMDB_API_KEY;
 
   if (!clave) {
     throw new Error("Falta la clave API de TMDB");
   }
 
-  const url = new URL(`${TMDB_URL}/search/movie`);
-  url.searchParams.set("api_key", clave);
-  url.searchParams.set("query", titulo);
-  url.searchParams.set("language", "es-ES");
-
-  const respuesta = await fetch(url);
-
-  if (!respuesta.ok) {
-    throw new Error("Error al consultar TMDB");
-  }
-
-  return respuesta.json();
+  return consultarPaginaBusquedaTMDB(
+    "movie",
+    titulo,
+    clave,
+    "es-ES",
+    pagina
+  );
 }
 
-export async function buscarSeries(titulo: string) {
+export async function buscarSeries(titulo: string, pagina = 1) {
   const clave = process.env.TMDB_API_KEY;
 
   if (!clave) {
     throw new Error("Falta la clave API de TMDB");
   }
 
-  const url = new URL(`${TMDB_URL}/search/tv`);
-  url.searchParams.set("api_key", clave);
-  url.searchParams.set("query", titulo);
-  url.searchParams.set("language", "es-ES");
-
-  const respuesta = await fetch(url);
-
-  if (!respuesta.ok) {
-    throw new Error("Error al consultar TMDB");
-  }
-
-  return respuesta.json();
+  return consultarPaginaBusquedaTMDB(
+    "tv",
+    titulo,
+    clave,
+    "es-ES",
+    pagina
+  );
 }
 
-export async function buscarTodo(titulo: string) {
+export async function buscarTodo(titulo: string, pagina = 1) {
   const [peliculas, series] = await Promise.all([
-    buscarPeliculas(titulo),
-    buscarSeries(titulo),
+    buscarPeliculas(titulo, pagina),
+    buscarSeries(titulo, pagina),
   ]);
 
   return {
+    page: pagina,
+    total_pages: Math.max(
+      peliculas.total_pages ?? 1,
+      series.total_pages ?? 1
+    ),
     results: [
-      ...(peliculas.results ?? []).map(
-        (item: { id: number }) => ({
-          ...item,
-          tipo: "pelicula",
-        })
-      ),
-      ...(series.results ?? []).map(
-        (item: { id: number }) => ({
-          ...item,
-          tipo: "serie",
-        })
-      ),
+      ...(peliculas.results ?? []).map((item) => ({
+        ...item,
+        tipo: "pelicula" as const,
+      })),
+      ...(series.results ?? []).map((item) => ({
+        ...item,
+        tipo: "serie" as const,
+      })),
     ],
   };
 }

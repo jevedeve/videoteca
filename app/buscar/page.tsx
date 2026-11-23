@@ -2,6 +2,11 @@ import { Film } from "lucide-react";
 import { BotonAgregarTMDB } from "@/components/BotonAgregarTMDB";
 import { ContadoresVideoteca } from "@/components/ContadoresVideoteca";
 import { obtenerContadores } from "@/lib/peliculas";
+import {
+  crearEnlacePaginaBusqueda,
+  MAX_PAGINAS_BUSQUEDA_TMDB,
+  normalizarPaginaBusqueda,
+} from "@/lib/tmdb-paginacion";
 import { buscarPeliculas, buscarSeries, buscarTodo } from "@/lib/tmdb";
 
 type ResultadoBusqueda = {
@@ -21,19 +26,26 @@ export default async function Buscar({
   searchParams: Promise<{
     q?: string;
     tipo?: string;
+    page?: string | string[];
   }>;
 }) {
-  const { q, tipo } = await searchParams;
+  const { q, tipo, page: paginaParam } = await searchParams;
+  const pagina = normalizarPaginaBusqueda(paginaParam);
   const contadores = await obtenerContadores();
   const datos = q
     ? tipo === "serie"
-      ? await buscarSeries(q)
+      ? await buscarSeries(q, pagina)
       : tipo === "pelicula"
-        ? await buscarPeliculas(q)
-        : await buscarTodo(q)
+        ? await buscarPeliculas(q, pagina)
+        : await buscarTodo(q, pagina)
     : null;
 
   const resultados = (datos?.results ?? []) as ResultadoBusqueda[];
+  const totalPaginas = Math.min(
+    MAX_PAGINAS_BUSQUEDA_TMDB,
+    Math.max(1, datos?.total_pages ?? 1)
+  );
+  const paginaActual = datos?.page ?? pagina;
   const tituloPagina =
     tipo === "serie"
       ? "Buscar series"
@@ -216,6 +228,47 @@ export default async function Buscar({
             })}
           </div>
         </section>
+      )}
+
+      {q && totalPaginas > 1 && (
+        <nav
+          aria-label="Paginación de resultados"
+          className="flex items-center justify-center gap-4"
+        >
+          {paginaActual > 1 ? (
+            <a
+              href={crearEnlacePaginaBusqueda(q, tipo, paginaActual - 1)}
+              className="rounded-lg border border-borde bg-superficie px-4 py-2 text-sm font-semibold text-texto transition-colors hover:border-principal/50 hover:text-principal"
+            >
+              Anterior
+            </a>
+          ) : (
+            <span
+              aria-disabled="true"
+              className="rounded-lg border border-borde bg-superficie px-4 py-2 text-sm font-semibold text-texto-terciario"
+            >
+              Anterior
+            </span>
+          )}
+          <span className="text-sm text-texto-secundario">
+            Página {paginaActual} de {totalPaginas}
+          </span>
+          {paginaActual < totalPaginas ? (
+            <a
+              href={crearEnlacePaginaBusqueda(q, tipo, paginaActual + 1)}
+              className="rounded-lg border border-borde bg-superficie px-4 py-2 text-sm font-semibold text-texto transition-colors hover:border-principal/50 hover:text-principal"
+            >
+              Siguiente
+            </a>
+          ) : (
+            <span
+              aria-disabled="true"
+              className="rounded-lg border border-borde bg-superficie px-4 py-2 text-sm font-semibold text-texto-terciario"
+            >
+              Siguiente
+            </span>
+          )}
+        </nav>
       )}
     </main>
   );
