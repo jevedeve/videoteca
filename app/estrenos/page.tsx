@@ -39,8 +39,6 @@ export default async function EstrenosPage({
   const nuevasTemporadas = seccion === "nuevas-temporadas";
   const esSerie = seriesEnEmision || seriesProximas;
   const proximamente = seccion === "proximamente";
-  const enCartelera =
-    !seriesEnEmision && !seriesProximas && !nuevasTemporadas && !proximamente;
   const datos = nuevasTemporadas
     ? null
     : seriesEnEmision
@@ -227,7 +225,7 @@ export default async function EstrenosPage({
                 />
               </div>
 
-              {enCartelera && contenido.tipo === "pelicula" && (
+              {contenido.tipo === "pelicula" && (
                 <MenuEntradas />
               )}
 
